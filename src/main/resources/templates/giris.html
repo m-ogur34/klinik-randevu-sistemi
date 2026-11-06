@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{parcalar :: head('Giriş')}"></head>
+<body>
+<header th:replace="~{parcalar :: ust}"></header>
+<main class="sayfa">
+    <h1>Giriş</h1>
+    <p class="soluk">Demo sürümünde şifre yoktur; giriş yapmak istediğiniz kullanıcıyı seçin.</p>
+
+    <div class="izgara">
+        <section class="kart" th:each="e : ${roller}" th:if="${!#lists.isEmpty(e.value)}">
+            <h2 th:text="${e.key.gorunenAd}">Rol</h2>
+            <form th:each="k : ${e.value}" th:action="@{/giris}" method="post" class="satir-form">
+                <input type="hidden" name="kisiId" th:value="${k.id}">
+                <button class="liste-dugme">
+                    <strong th:text="${k.gorunenAd()}">Ad</strong>
+                    <span class="soluk" th:if="${k.rol.name() == 'YONETICI'}" th:text="${k.kurulus.ad}"></span>
+                    <span class="soluk" th:if="${k.rol.name() == 'DOKTOR' or k.rol.name() == 'SAGLIK_PERSONELI'}" th:text="${k.sube.tamAd()}"></span>
+                    <span class="soluk" th:if="${k.rol.name() == 'HASTA'}" th:text="'T.C. ' + ${k.maskeliTcKimlikNo()}"></span>
+                </button>
+            </form>
+        </section>
+
+        <section class="kart">
+            <h2>Yeni hasta kaydı</h2>
+            <form th:action="@{/kayit}" method="post" class="dikey">
+                <label>Ad <input name="ad" required></label>
+                <label>Soyad <input name="soyad" required></label>
+                <label>T.C. kimlik no <input name="tcKimlikNo" pattern="\d{11}" maxlength="11" required></label>
+                <label>Doğum tarihi <input type="date" name="dogumTarihi" required></label>
+                <label>Telefon <input name="telefon" placeholder="isteğe bağlı"></label>
+                <label>E-posta <input type="email" name="eposta" placeholder="isteğe bağlı"></label>
+                <button>Kayıt ol ve giriş yap</button>
+            </form>
+        </section>
+    </div>
+</main>
+</body>
+</html>

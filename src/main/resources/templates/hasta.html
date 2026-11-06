@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{parcalar :: head('Hasta')}"></head>
+<body>
+<header th:replace="~{parcalar :: ust}"></header>
+<main class="sayfa">
+    <h1>Randevu al</h1>
+
+    <section class="kart">
+        <form method="get" th:action="@{/hasta}" class="adimlar">
+            <label>1 · Şube
+                <select name="subeId" onchange="this.form.submit()">
+                    <option value="">Seçin…</option>
+                    <option th:each="s : ${subeler}" th:value="${s.id}" th:text="${s.tamAd()}"
+                            th:selected="${sube != null and s.id == sube.id}"></option>
+                </select>
+            </label>
+            <label th:if="${sube != null}">2 · Hizmet
+                <select name="hizmetId" onchange="this.form.submit()">
+                    <option value="">Seçin…</option>
+                    <option th:each="h : ${sube.hizmetler}" th:value="${h.id}"
+                            th:text="${h.ad} + ' · ' + ${h.sure.toMinutes()} + ' dk · ' + ${h.ucret} + ' TL'"
+                            th:selected="${hizmet != null and h.id == hizmet.id}"></option>
+                </select>
+            </label>
+            <label th:if="${hizmet != null}">3 · Doktor / personel
+                <select name="calisanId" onchange="this.form.submit()">
+                    <option value="">Seçin…</option>
+                    <option th:each="c : ${calisanlar}" th:value="${c.id}" th:text="${c.gorunenAd()}"
+                            th:selected="${calisan != null and c.id == calisan.id}"></option>
+                </select>
+            </label>
+            <label th:if="${calisan != null}">4 · Gün
+                <input type="date" name="tarih" th:value="${tarih}" th:min="${enErkenTarih}" onchange="this.form.submit()">
+            </label>
+            <noscript><button>Devam</button></noscript>
+        </form>
+
+        <p class="soluk" th:if="${hizmet != null and #lists.isEmpty(calisanlar)}">Bu şubede bu hizmeti veren çalışan yok.</p>
+
+        <div th:if="${calisan != null}">
+            <h3>5 · Uygun saatler <span class="soluk" th:text="'(' + ${#temporals.format(tarih, 'dd.MM.yyyy')} + ', ' + ${gunAdlari.get(tarih.dayOfWeek)} + ')'"></span></h3>
+            <p class="soluk" th:if="${#lists.isEmpty(saatler)}">Bu gün için uygun saat yok; başka bir gün seçin.</p>
+            <div class="saatler">
+                <form th:each="s : ${saatler}" th:action="@{/hasta/randevu}" method="post">
+                    <input type="hidden" name="calisanId" th:value="${calisan.id}">
+                    <input type="hidden" name="hizmetId" th:value="${hizmet.id}">
+                    <input type="hidden" name="baslangic" th:value="${s}">
+                    <button class="saat" th:text="${#temporals.format(s, 'HH:mm')}">09:00</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <div class="izgara iki">
+        <section class="kart">
+            <h2>Randevularım</h2>
+            <p class="soluk" th:if="${#lists.isEmpty(randevular)}">Henüz randevunuz yok.</p>
+            <table th:if="${!#lists.isEmpty(randevular)}">
+                <tr><th>Tarih</th><th>Hizmet</th><th>Çalışan / şube</th><th>Ücret</th><th>Durum</th><th></th></tr>
+                <tr th:each="r : ${randevular}">
+                    <td th:text="${#temporals.format(r.zaman.baslangic, 'dd.MM.yyyy HH:mm')}"></td>
+                    <td th:text="${r.hizmet.ad} + ' (' + ${r.zaman.sure().toMinutes()} + ' dk)'"></td>
+                    <td><span th:text="${r.calisan.gorunenAd()}"></span><br><span class="soluk" th:text="${r.sube.tamAd()}"></span></td>
+                    <td th:text="${r.ucret} + ' TL'"></td>
+                    <td><span th:replace="~{parcalar :: durum(${r})}"></span>
+                        <div class="soluk" th:if="${r.durumAciklamasi}" th:text="${r.durumAciklamasi}"></div></td>
+                    <td>
+                        <form th:if="${r.aktifMi()}" th:action="@{/hasta/randevu/{id}/iptal(id=${r.id})}" method="post">
+                            <button class="ikincil kucuk" onclick="return confirm('Randevu iptal edilsin mi?')">İptal</button>
+                        </form>
+                    </td>
+                </tr>
+            </table>
+        </section>
+        <section th:replace="~{parcalar :: bildirimler}"></section>
+    </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{parcalar :: head('Çalışan')}"></head>
+<body>
+<header th:replace="~{parcalar :: ust}"></header>
+<main class="sayfa">
+    <h1 th:text="${kullanici.gorunenAd()}">Çalışan</h1>
+    <p class="soluk" th:text="${kullanici.sube.tamAd()} + ' · Verdiği hizmetler: ' + ${#strings.setJoin(kullanici.hizmetler.![ad], ', ')}"></p>
+
+    <section class="kart">
+        <h2>Onay bekleyen randevular <span class="sayac" th:text="${#lists.size(bekleyenler)}">0</span></h2>
+        <p class="soluk" th:if="${#lists.isEmpty(bekleyenler)}">Onay bekleyen randevu yok.</p>
+        <table th:if="${!#lists.isEmpty(bekleyenler)}">
+            <tr><th>Tarih</th><th>Hasta</th><th>Hizmet</th><th>İşlem</th></tr>
+            <tr th:each="r : ${bekleyenler}">
+                <td th:text="${#temporals.format(r.zaman.baslangic, 'dd.MM.yyyy HH:mm')} + '–' + ${#temporals.format(r.zaman.bitis, 'HH:mm')}"></td>
+                <td th:text="${r.hasta.gorunenAd()}"></td>
+                <td th:text="${r.hizmet.ad}"></td>
+                <td class="islemler">
+                    <form th:action="@{/calisan/randevu/{id}/onayla(id=${r.id})}" method="post"><button class="kucuk">Onayla</button></form>
+                    <form th:action="@{/calisan/randevu/{id}/reddet(id=${r.id})}" method="post" class="satir-form">
+                        <input name="gerekce" placeholder="Ret gerekçesi" class="kucuk-girdi">
+                        <button class="tehlike kucuk">Reddet</button>
+                    </form>
+                </td>
+            </tr>
+        </table>
+    </section>
+
+    <div class="izgara iki">
+        <section class="kart">
+            <h2>Onaylı randevular</h2>
+            <p class="soluk" th:if="${#lists.isEmpty(onaylilar)}">Onaylı randevu yok.</p>
+            <table th:if="${!#lists.isEmpty(onaylilar)}">
+                <tr><th>Tarih</th><th>Hasta</th><th>Hizmet</th><th></th></tr>
+                <tr th:each="r : ${onaylilar}">
+                    <td th:text="${#temporals.format(r.zaman.baslangic, 'dd.MM.yyyy HH:mm')}"></td>
+                    <td th:text="${r.hasta.gorunenAd()}"></td>
+                    <td th:text="${r.hizmet.ad}"></td>
+                    <td class="islemler">
+                        <form th:if="${!r.zaman.baslangic.isAfter(simdi)}" th:action="@{/calisan/randevu/{id}/tamamla(id=${r.id})}" method="post"><button class="kucuk">Tamamlandı</button></form>
+                        <form th:if="${r.zaman.baslangic.isAfter(simdi)}" th:action="@{/calisan/randevu/{id}/iptal(id=${r.id})}" method="post">
+                            <button class="ikincil kucuk" onclick="return confirm('Randevu iptal edilsin mi?')">İptal</button>
+                        </form>
+                    </td>
+                </tr>
+            </table>
+        </section>
+
+        <section class="kart">
+            <h2>Uygunluk dilimlerim</h2>
+            <p class="soluk">Hastalar yalnızca bu zaman dilimlerine randevu alabilir.</p>
+            <ul class="etiketler">
+                <li th:each="d : ${uygunluklar}" th:text="${gunAdlari.get(d.gun)} + ' ' + ${d.saatAraligi}"></li>
+            </ul>
+            <form th:action="@{/calisan/uygunluk}" method="post" class="satir-form">
+                <select name="gun"><option th:each="g : ${gunler}" th:value="${g}" th:text="${gunAdlari.get(g)}"></option></select>
+                <input type="time" name="baslangic" value="09:00" required>
+                <input type="time" name="bitis" value="12:00" required>
+                <button class="kucuk">Ekle</button>
+            </form>
+        </section>
+    </div>
+
+    <div class="izgara iki">
+        <section class="kart">
+            <h2>Geçmiş</h2>
+            <p class="soluk" th:if="${#lists.isEmpty(gecmis)}">Kayıt yok.</p>
+            <table th:if="${!#lists.isEmpty(gecmis)}">
+                <tr><th>Tarih</th><th>Hasta</th><th>Durum</th></tr>
+                <tr th:each="r : ${gecmis}">
+                    <td th:text="${#temporals.format(r.zaman.baslangic, 'dd.MM.yyyy HH:mm')}"></td>
+                    <td th:text="${r.hasta.gorunenAd()}"></td>
+                    <td><span th:replace="~{parcalar :: durum(${r})}"></span></td>
+                </tr>
+            </table>
+        </section>
+        <section th:replace="~{parcalar :: bildirimler}"></section>
+    </div>
+</main>
+</body>
+</html>

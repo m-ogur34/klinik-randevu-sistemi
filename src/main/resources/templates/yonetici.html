@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{parcalar :: head('Yönetici')}"></head>
+<body>
+<header th:replace="~{parcalar :: ust}"></header>
+<main class="sayfa">
+    <h1 th:text="${kurulus.ad}">Kuruluş</h1>
+    <p class="soluk" th:text="(${kurulus.tur.name() == 'HASTANE'} ? 'Hastane' : 'Klinik') + ' · ' + ${#lists.size(kurulus.subeler)} + ' şube'"></p>
+
+    <section class="kart" th:each="e : ${calisanlar}" th:with="s=${e.key}">
+        <h2 th:text="${s.ad} + ' şubesi'">Şube</h2>
+        <p class="soluk" th:text="${s.adres}"></p>
+
+        <div class="izgara uc">
+            <div>
+                <h3>Çalışma saatleri</h3>
+                <table class="sade">
+                    <tr th:each="g : ${gunler}">
+                        <td th:text="${gunAdlari.get(g)}"></td>
+                        <td th:text="${s.calismaSaatleri.getir(g).isPresent()} ? ${s.calismaSaatleri.getir(g).get()} : 'kapalı'"></td>
+                    </tr>
+                </table>
+                <form th:action="@{/yonetici/sube/{id}/calisma-saati(id=${s.id})}" method="post" class="satir-form">
+                    <select name="gun"><option th:each="g : ${gunler}" th:value="${g}" th:text="${gunAdlari.get(g)}"></option></select>
+                    <input type="time" name="acilis" value="09:00"><input type="time" name="kapanis" value="17:00">
+                    <label class="onay"><input type="checkbox" name="kapali" value="true"> kapalı</label>
+                    <button class="kucuk">Kaydet</button>
+                </form>
+            </div>
+            <div>
+                <h3>Bölümler</h3>
+                <ul class="etiketler"><li th:each="b : ${s.bolumler}" th:text="${b}"></li></ul>
+                <form th:action="@{/yonetici/sube/{id}/bolum(id=${s.id})}" method="post" class="satir-form">
+                    <input name="bolum" placeholder="Yeni bölüm" required><button class="kucuk">Ekle</button>
+                </form>
+            </div>
+            <div>
+                <h3>Hizmetler</h3>
+                <table class="sade">
+                    <tr th:each="h : ${s.hizmetler}">
+                        <td th:text="${h.ad}"></td><td th:text="${h.sure.toMinutes()} + ' dk'"></td><td th:text="${h.ucret} + ' TL'"></td>
+                    </tr>
+                </table>
+                <form th:action="@{/yonetici/sube/{id}/hizmet(id=${s.id})}" method="post" class="dikey sikisik">
+                    <input name="ad" placeholder="Hizmet adı" required>
+                    <div class="satir-form">
+                        <select name="tur"><option th:each="t : ${hizmetTurleri}" th:value="${t}" th:text="${t.gorunenAd}"></option></select>
+                        <select name="bolum"><option th:each="b : ${s.bolumler}" th:value="${b}" th:text="${b}"></option></select>
+                    </div>
+                    <div class="satir-form">
+                        <input type="number" name="sureDakika" min="1" max="480" placeholder="Süre (dk)" required>
+                        <input type="number" name="ucret" min="0" step="0.01" placeholder="Ücret (TL)" required>
+                        <button class="kucuk">Tanımla</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <h3>Çalışanlar</h3>
+        <table>
+            <tr><th>Ad</th><th>Rol</th><th>Hizmetleri</th><th>Uygunluk</th><th>Hizmet ata</th></tr>
+            <tr th:each="c : ${e.value}">
+                <td th:text="${c.gorunenAd()}"></td>
+                <td th:text="${c.rol.gorunenAd}"></td>
+                <td th:text="${#strings.setJoin(c.hizmetler.![ad], ', ')}"></td>
+                <td><span th:each="d, i : ${c.uygunluklar}" th:text="${gunAdlari.get(d.gun)} + ' ' + ${d.saatAraligi} + (${i.last} ? '' : ', ')"></span></td>
+                <td>
+                    <form th:action="@{/yonetici/calisan/{id}/hizmet(id=${c.id})}" method="post" class="satir-form">
+                        <select name="hizmetId"><option th:each="h : ${s.hizmetler}" th:value="${h.id}" th:text="${h.ad}"></option></select>
+                        <button class="kucuk">Ata</button>
+                    </form>
+                </td>
+            </tr>
+        </table>
+        <form th:action="@{/yonetici/sube/{id}/calisan(id=${s.id})}" method="post" class="satir-form">
+            <select name="tip"><option value="doktor">Doktor</option><option value="personel">Sağlık personeli</option></select>
+            <input name="unvan" placeholder="Unvan (Dr., Uzm. Dr.)" class="kucuk-girdi">
+            <input name="ad" placeholder="Ad" required><input name="soyad" placeholder="Soyad" required>
+            <input name="alan" placeholder="Uzmanlık / görev" required>
+            <button class="kucuk">Çalışan ekle</button>
+        </form>
+    </section>
+
+    <section class="kart">
+        <h2>Yeni şube aç</h2>
+        <form th:action="@{/yonetici/sube}" method="post" class="satir-form">
+            <input name="ad" placeholder="Şube adı" required>
+            <input name="adres" placeholder="Adres">
+            <label>Hafta içi <input type="time" name="acilis" value="09:00"></label>
+            <label>– <input type="time" name="kapanis" value="17:00"></label>
+            <button class="kucuk">Aç</button>
+        </form>
+    </section>
+
+    <div class="izgara iki">
+        <section class="kart">
+            <h2>Tüm randevular</h2>
+            <p class="soluk" th:if="${#lists.isEmpty(randevular)}">Randevu yok.</p>
+            <table th:if="${!#lists.isEmpty(randevular)}">
+                <tr><th>Tarih</th><th>Hasta</th><th>Çalışan / hizmet</th><th>Durum</th><th></th></tr>
+                <tr th:each="r : ${randevular}">
+                    <td th:text="${#temporals.format(r.zaman.baslangic, 'dd.MM.yyyy HH:mm')}"></td>
+                    <td th:text="${r.hasta.gorunenAd()}"></td>
+                    <td><span th:text="${r.calisan.gorunenAd()}"></span><br><span class="soluk" th:text="${r.hizmet.ad} + ' · ' + ${r.sube.ad}"></span></td>
+                    <td><span th:replace="~{parcalar :: durum(${r})}"></span></td>
+                    <td class="islemler">
+                        <form th:if="${r.durum.name() == 'ONAY_BEKLIYOR'}" th:action="@{/yonetici/randevu/{id}/onayla(id=${r.id})}" method="post"><button class="kucuk">Onayla</button></form>
+                        <form th:if="${r.durum.name() == 'ONAY_BEKLIYOR'}" th:action="@{/yonetici/randevu/{id}/reddet(id=${r.id})}" method="post"><button class="tehlike kucuk">Reddet</button></form>
+                        <form th:if="${r.durum.name() == 'ONAYLANDI'}" th:action="@{/yonetici/randevu/{id}/iptal(id=${r.id})}" method="post"><button class="ikincil kucuk">İptal</button></form>
+                    </td>
+                </tr>
+            </table>
+        </section>
+        <section th:replace="~{parcalar :: bildirimler}"></section>
+    </div>
+</main>
+</body>
+</html>

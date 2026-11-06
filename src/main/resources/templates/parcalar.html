@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(baslik)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${baslik} + ' · Klinik Randevu'">Klinik Randevu</title>
+    <link rel="stylesheet" th:href="@{/stil.css}">
+</head>
+<body>
+
+<header th:fragment="ust">
+    <div class="ust">
+        <a class="logo" th:href="@{/}">✚ Klinik Randevu Sistemi</a>
+        <div class="kullanici" th:if="${kullanici != null}">
+            <span class="rol" th:text="${kullanici.rol.gorunenAd}">Rol</span>
+            <strong th:text="${kullanici.gorunenAd()}">Ad Soyad</strong>
+            <form th:action="@{/cikis}" method="post"><button class="ikincil kucuk">Çıkış</button></form>
+        </div>
+    </div>
+    <div class="sayfa">
+        <div class="mesaj bilgi" th:if="${bilgi}" th:text="${bilgi}">bilgi</div>
+        <div class="mesaj hata" th:if="${hata}" th:text="${hata}">hata</div>
+    </div>
+</header>
+
+<section th:fragment="bildirimler" class="kart">
+    <h2>Bildirimler</h2>
+    <p class="soluk" th:if="${#lists.isEmpty(bildirimler)}">Henüz bildiriminiz yok.</p>
+    <ul class="bildirimler">
+        <li th:each="b, d : ${bildirimler}" th:if="${d.index < 8}">
+            <span class="soluk" th:text="${#temporals.format(b.zaman, 'dd.MM HH:mm')}">zaman</span>
+            <span th:text="${b.mesaj}">mesaj</span>
+        </li>
+    </ul>
+</section>
+
+<span th:fragment="durum(r)" th:class="'durum ' + ${r.durum.name()}" th:text="${r.durum.gorunenAd}">Durum</span>
+
+</body>
+</html>

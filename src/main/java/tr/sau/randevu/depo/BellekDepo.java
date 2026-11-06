@@ -17,7 +17,7 @@ public class BellekDepo<T extends Varlik> implements Depo<T> {
     private final AtomicLong sayac = new AtomicLong();
 
     @Override
-    public T kaydet(T nesne) {
+    public <S extends T> S kaydet(S nesne) {
         if (nesne.getId() == null) {
             nesne.kimlikAta(sayac.incrementAndGet());
         }

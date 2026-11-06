@@ -15,6 +15,7 @@ import tr.sau.randevu.model.kisi.Kisi;
 import tr.sau.randevu.model.kisi.RandevuVerebilir;
 import tr.sau.randevu.model.kisi.Yonetici;
 import tr.sau.randevu.model.kurum.Hizmet;
+import tr.sau.randevu.model.kurum.SaglikKurulusu;
 import tr.sau.randevu.model.randevu.Randevu;
 import tr.sau.randevu.model.randevu.RandevuDurumu;
 import tr.sau.randevu.model.randevu.UygunlukDilimi;
@@ -177,6 +178,10 @@ public class RandevuServisi {
 
     public List<Randevu> onayBekleyenler(RandevuVerebilir calisan) {
         return calisaninRandevulari(calisan).stream().filter(r -> r.getDurum() == RandevuDurumu.ONAY_BEKLIYOR).toList();
+    }
+
+    public List<Randevu> kurulusunRandevulari(SaglikKurulusu kurulus) {
+        return sirali(depo.filtrele(r -> r.getSube().getKurulus().equals(kurulus)));
     }
 
     private static List<Randevu> sirali(List<Randevu> liste) {

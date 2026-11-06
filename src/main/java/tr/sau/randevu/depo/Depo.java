@@ -12,7 +12,8 @@ import java.util.function.Predicate;
  */
 public interface Depo<T extends Varlik> {
 
-    T kaydet(T nesne);
+    /** Kaydedilen nesnenin kendi türünü döndürür: Depo<Kisi>.kaydet(doktor) bir Doktor verir. */
+    <S extends T> S kaydet(S nesne);
 
     Optional<T> bul(long id);
 
