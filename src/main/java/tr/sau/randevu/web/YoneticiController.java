@@ -18,6 +18,7 @@ import tr.sau.randevu.model.kurum.Sube;
 import tr.sau.randevu.model.randevu.SaatAraligi;
 import tr.sau.randevu.servis.KurumServisi;
 import tr.sau.randevu.servis.RandevuServisi;
+import tr.sau.randevu.servis.RaporServisi;
 
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
@@ -34,11 +35,13 @@ public class YoneticiController {
 
     private final KurumServisi kurum;
     private final RandevuServisi randevu;
+    private final RaporServisi rapor;
     private final Oturum oturum;
 
-    public YoneticiController(KurumServisi kurum, RandevuServisi randevu, Oturum oturum) {
+    public YoneticiController(KurumServisi kurum, RandevuServisi randevu, RaporServisi rapor, Oturum oturum) {
         this.kurum = kurum;
         this.randevu = randevu;
+        this.rapor = rapor;
         this.oturum = oturum;
     }
 
@@ -50,6 +53,7 @@ public class YoneticiController {
         model.addAttribute("kurulus", y.getKurulus());
         model.addAttribute("calisanlar", calisanlar);
         model.addAttribute("randevular", randevu.kurulusunRandevulari(y.getKurulus()));
+        model.addAttribute("rapor", rapor.kurulusRaporu(y.getKurulus()));
         model.addAttribute("hizmetTurleri", HizmetTuru.values());
         model.addAttribute("gunler", DayOfWeek.values());
         return "yonetici";

@@ -12,6 +12,7 @@ import tr.sau.randevu.model.randevu.Randevu;
 import tr.sau.randevu.olay.BildirimKutusu;
 import tr.sau.randevu.servis.KurumServisi;
 import tr.sau.randevu.servis.RandevuServisi;
+import tr.sau.randevu.servis.RaporServisi;
 
 import java.time.Clock;
 import java.time.ZoneId;
@@ -52,5 +53,10 @@ public class UygulamaYapilandirmasi {
         RandevuServisi servis = RandevuServisi.varsayilan(randevuDepo, saat);
         servis.dinleyiciEkle(bildirimKutusu);
         return servis;
+    }
+
+    @Bean
+    RaporServisi raporServisi(RandevuServisi randevuServisi) {
+        return new RaporServisi(randevuServisi);
     }
 }

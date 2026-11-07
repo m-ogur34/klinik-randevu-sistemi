@@ -15,7 +15,7 @@ Gereksinimler: Java 21+, Maven.
 
 ```bash
 mvn spring-boot:run     # http://localhost:8081
-mvn test                # 30 test (birim + web akışı)
+mvn test                # 32 test (birim + web akışı)
 ```
 
 Uygulama açılırken kurgusal örnek veri yüklenir: iki şubeli **Sakarya Şifa Hastanesi**, tek şubeli
@@ -36,6 +36,7 @@ kullanıcı seçilerek o rolle sisteme girilir (demo sürümde şifre yoktur). Y
 | Randevu detayları (işlem, süre, ücret, çalışan, tarih/saat) | `Randevu` — oluşturulduğu anda sabitlenir |
 | Onay mekanizması | `RandevuDurumu`, `RandevuServisi.onayla/reddet` · Çalışan ve yönetici ekranları |
 | Roller: Hasta, Doktor / Sağlık Personeli, Yönetici | `Rol`, `Hasta`, `Calisan`, `Yonetici`, `Oturum` |
+| *(Ek)* Yönetici raporu: şube/hizmet bazında randevu sayıları ve ciro | `RaporServisi` (Stream API, `groupingBy`) · Yönetici ekranı |
 
 ## Sınıf diyagramı
 
@@ -131,14 +132,14 @@ src/main/java/tr/sau/randevu/
 ├─ model/kurum     SaglikKurulusu, Sube, CalismaSaatleri, Hizmet, HizmetTuru
 ├─ model/randevu   Randevu, RandevuDurumu, ZamanAraligi, SaatAraligi, UygunlukDilimi
 ├─ kural           RandevuKurali ve 5 kural sınıfı
-├─ servis          RandevuServisi, KurumServisi
+├─ servis          RandevuServisi, KurumServisi, RaporServisi
 ├─ olay            RandevuOlayi, RandevuDinleyici, BildirimKutusu
 ├─ depo            Depo<T>, BellekDepo<T>
 ├─ hata            RandevuHatasi, YetkiHatasi
 ├─ web             Oturum, GirisController, HastaController, CalisanController, YoneticiController
 ├─ UygulamaYapilandirmasi, OrnekVeri, RandevuUygulamasi
 src/main/resources/templates   Thymeleaf sayfaları
-src/test/java                  ModelTest, RandevuServisiTest, KurumServisiTest, WebAkisTest
+src/test/java                  ModelTest, RandevuServisiTest, KurumServisiTest, RaporServisiTest, WebAkisTest
 ```
 
 ## Sınırlılıklar ve geliştirme fikirleri

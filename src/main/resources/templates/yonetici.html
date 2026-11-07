@@ -92,6 +92,33 @@
         </form>
     </section>
 
+    <section class="kart" th:with="g=${rapor.genel()}">
+        <h2>Rapor</h2>
+        <div class="istatistikler">
+            <div><strong th:text="${g.toplam()}">0</strong><span>randevu</span></div>
+            <div><strong th:text="${g.ciro} + ' TL'">0</strong><span>ciro (onaylı + tamamlanan)</span></div>
+            <div><strong th:text="${g.bekleyenTutar} + ' TL'">0</strong><span>onay bekleyen tutar</span></div>
+            <div><strong th:text="'%' + ${#numbers.formatDecimal(g.kayipOrani() * 100, 1, 0)}">0</strong><span>ret + iptal oranı</span></div>
+        </div>
+        <div class="izgara iki-esit">
+            <div th:each="b : ${ {{'Şube bazında', rapor.subeler()}, {'Hizmet bazında', rapor.hizmetler()}} }">
+                <h3 th:text="${b[0]}">Başlık</h3>
+                <p class="soluk" th:if="${#lists.isEmpty(b[1])}">Henüz randevu yok.</p>
+                <table th:if="${!#lists.isEmpty(b[1])}">
+                    <tr><th>Ad</th><th>Toplam</th><th>Onaylı</th><th>Bekleyen</th><th>Ret / iptal</th><th>Ciro</th></tr>
+                    <tr th:each="o : ${b[1]}">
+                        <td th:text="${o.ad}"></td>
+                        <td th:text="${o.toplam()}"></td>
+                        <td th:text="${o.sayi(T(tr.sau.randevu.model.randevu.RandevuDurumu).ONAYLANDI) + o.sayi(T(tr.sau.randevu.model.randevu.RandevuDurumu).TAMAMLANDI)}"></td>
+                        <td th:text="${o.sayi(T(tr.sau.randevu.model.randevu.RandevuDurumu).ONAY_BEKLIYOR)}"></td>
+                        <td th:text="${o.sayi(T(tr.sau.randevu.model.randevu.RandevuDurumu).REDDEDILDI) + o.sayi(T(tr.sau.randevu.model.randevu.RandevuDurumu).IPTAL_EDILDI)}"></td>
+                        <td th:text="${o.ciro} + ' TL'"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </section>
+
     <div class="izgara iki">
         <section class="kart">
             <h2>Tüm randevular</h2>
