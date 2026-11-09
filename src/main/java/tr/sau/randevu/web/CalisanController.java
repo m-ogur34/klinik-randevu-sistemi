@@ -15,11 +15,13 @@ import tr.sau.randevu.model.randevu.Randevu;
 import tr.sau.randevu.model.randevu.RandevuDurumu;
 import tr.sau.randevu.model.randevu.SaatAraligi;
 import tr.sau.randevu.model.randevu.UygunlukDilimi;
+import tr.sau.randevu.servis.HaftalikTakvim;
 import tr.sau.randevu.servis.KurumServisi;
 import tr.sau.randevu.servis.RandevuServisi;
 
 import java.time.Clock;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Comparator;
@@ -43,10 +45,12 @@ public class CalisanController {
     }
 
     @GetMapping
-    public String panel(HttpSession session, Model model) {
+    public String panel(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hafta,
+                        HttpSession session, Model model) {
         Calisan calisan = oturum.gerekli(session, Calisan.class);
         LocalDateTime simdi = LocalDateTime.now(saat);
         List<Randevu> tumu = randevu.calisaninRandevulari(calisan);
+        model.addAttribute("takvim", HaftalikTakvim.olustur(calisan, tumu, hafta != null ? hafta : simdi.toLocalDate(), simdi.toLocalDate()));
         model.addAttribute("bekleyenler", tumu.stream().filter(r -> r.getDurum() == RandevuDurumu.ONAY_BEKLIYOR).toList());
         model.addAttribute("onaylilar", tumu.stream().filter(r -> r.getDurum() == RandevuDurumu.ONAYLANDI).toList());
         model.addAttribute("gecmis", tumu.stream().filter(r -> !r.aktifMi()).toList().reversed());

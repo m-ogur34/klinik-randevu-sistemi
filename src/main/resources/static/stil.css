@@ -63,4 +63,21 @@ table.sade td { padding: 3px 6px; border: 0; font-size: 13px; }
 .bildirimler { list-style: none; padding: 0; margin: 0; }
 .bildirimler li { padding: 8px 0; border-bottom: 1px solid var(--cizgi); font-size: 13px; display: flex; flex-direction: column; }
 .onay { font-size: 13px; display: flex; align-items: center; gap: 4px; }
+.takvim-baslik { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.takvim-baslik h2 { margin: 0; }
+.takvim-gezinme { display: flex; gap: 6px; }
+.dugme-link { padding: 5px 10px; border: 1px solid var(--cizgi); border-radius: 8px; text-decoration: none; color: var(--yazi); font-size: 13px; background: #fff; }
+.dugme-link:hover { border-color: var(--ana); color: var(--ana); }
+.takvim { display: grid; grid-template-columns: repeat(7, minmax(120px, 1fr)); gap: 8px; overflow-x: auto; }
+.gun { border: 1px solid var(--cizgi); border-radius: 10px; padding: 8px; min-height: 140px; background: #fafcfd; }
+.gun.bugun { border-color: var(--ana); box-shadow: 0 0 0 1px var(--ana) inset; }
+.gun-baslik { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; font-size: 13px; }
+.doluluk { height: 4px; background: var(--cizgi); border-radius: 99px; margin-bottom: 6px; overflow: hidden; }
+.doluluk span { display: block; height: 100%; background: var(--ana); }
+.blok { border-radius: 6px; padding: 4px 6px; margin-bottom: 4px; font-size: 12px; display: flex; flex-direction: column; }
+.blok.uygun { background: var(--ana-acik); color: var(--ana); }
+.blok.randevu.ONAY_BEKLIYOR { background: #fff4e0; color: var(--uyari); }
+.blok.randevu.ONAYLANDI { background: var(--ana); color: #fff; }
+.blok.randevu.TAMAMLANDI { background: #e8eaf6; color: #303f9f; }
+.kucuk-yazi { font-size: 12px; margin: 0; }
 @media (max-width: 800px) { .izgara.iki-esit { grid-template-columns: 1fr; } .izgara.iki { grid-template-columns: 1fr; } .sayfa { padding: 12px 16px; } }

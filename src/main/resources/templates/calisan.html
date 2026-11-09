@@ -27,6 +27,36 @@
         </table>
     </section>
 
+    <section class="kart">
+        <div class="takvim-baslik">
+            <h2 th:text="'Haftalık takvim · ' + ${#temporals.format(takvim.haftaBasi, 'dd.MM')} + ' – ' + ${#temporals.format(takvim.haftaSonu(), 'dd.MM.yyyy')}">Haftalık takvim</h2>
+            <div class="takvim-gezinme">
+                <a class="dugme-link" th:href="@{/calisan(hafta=${takvim.oncekiHafta()})}">← Önceki</a>
+                <a class="dugme-link" th:href="@{/calisan}">Bu hafta</a>
+                <a class="dugme-link" th:href="@{/calisan(hafta=${takvim.sonrakiHafta()})}">Sonraki →</a>
+            </div>
+        </div>
+        <p class="soluk" th:text="${takvim.toplamRandevu()} + ' randevu · açık renk: uygunluk dilimi, renkli: randevu'"></p>
+        <div class="takvim">
+            <div th:each="g : ${takvim.gunler}" th:class="${g.bugun} ? 'gun bugun' : 'gun'">
+                <div class="gun-baslik">
+                    <strong th:text="${gunAdlari.get(g.tarih.dayOfWeek)}">Pazartesi</strong>
+                    <span class="soluk" th:text="${#temporals.format(g.tarih, 'dd.MM')}">09.11</span>
+                </div>
+                <div class="doluluk" th:if="${g.uygunDakika() > 0}" th:title="'Doluluk %' + ${g.dolulukYuzdesi()}">
+                    <span th:style="'width:' + ${g.dolulukYuzdesi()} + '%'"></span>
+                </div>
+                <div class="blok uygun" th:each="a : ${g.uygunluklar}" th:text="${a}">09:00–12:00</div>
+                <div th:each="r : ${g.randevular}" th:class="'blok randevu ' + ${r.durum.name()}"
+                     th:title="${r.hizmet.ad} + ' · ' + ${r.durum.gorunenAd}">
+                    <strong th:text="${#temporals.format(r.zaman.baslangic, 'HH:mm')} + '–' + ${#temporals.format(r.zaman.bitis, 'HH:mm')}"></strong>
+                    <span th:text="${r.hasta.gorunenAd()}"></span>
+                </div>
+                <p class="soluk kucuk-yazi" th:if="${#lists.isEmpty(g.uygunluklar) and #lists.isEmpty(g.randevular)}">—</p>
+            </div>
+        </div>
+    </section>
+
     <div class="izgara iki">
         <section class="kart">
             <h2>Onaylı randevular</h2>

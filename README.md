@@ -15,7 +15,7 @@ Gereksinimler: Java 21+, Maven.
 
 ```bash
 mvn spring-boot:run     # http://localhost:8081
-mvn test                # 32 test (birim + web akışı)
+mvn test                # 34 test (birim + web akışı)
 ```
 
 Uygulama açılırken kurgusal örnek veri yüklenir: iki şubeli **Sakarya Şifa Hastanesi**, tek şubeli
@@ -37,6 +37,7 @@ kullanıcı seçilerek o rolle sisteme girilir (demo sürümde şifre yoktur). Y
 | Onay mekanizması | `RandevuDurumu`, `RandevuServisi.onayla/reddet` · Çalışan ve yönetici ekranları |
 | Roller: Hasta, Doktor / Sağlık Personeli, Yönetici | `Rol`, `Hasta`, `Calisan`, `Yonetici`, `Oturum` |
 | *(Ek)* Yönetici raporu: şube/hizmet bazında randevu sayıları ve ciro | `RaporServisi` (Stream API, `groupingBy`) · Yönetici ekranı |
+| *(Ek)* Haftalık takvim: uygunluk dilimleri, randevular ve günlük doluluk | `HaftalikTakvim` · Çalışan ekranı (önceki/sonraki hafta) |
 
 ## Sınıf diyagramı
 
@@ -124,6 +125,10 @@ edilen randevunun saati yeniden alınabilir. Her durum değişikliği ilgili ki�
 
 Yönetici ekranı: [docs/ekran-goruntuleri/04_yonetici.png](docs/ekran-goruntuleri/04_yonetici.png)
 
+Haftalık takvim (çalışan ekranı):
+
+![Haftalık takvim](docs/ekran-goruntuleri/05_takvim.png)
+
 ## Proje yapısı
 
 ```
@@ -132,14 +137,14 @@ src/main/java/tr/sau/randevu/
 ├─ model/kurum     SaglikKurulusu, Sube, CalismaSaatleri, Hizmet, HizmetTuru
 ├─ model/randevu   Randevu, RandevuDurumu, ZamanAraligi, SaatAraligi, UygunlukDilimi
 ├─ kural           RandevuKurali ve 5 kural sınıfı
-├─ servis          RandevuServisi, KurumServisi, RaporServisi
+├─ servis          RandevuServisi, KurumServisi, RaporServisi, HaftalikTakvim
 ├─ olay            RandevuOlayi, RandevuDinleyici, BildirimKutusu
 ├─ depo            Depo<T>, BellekDepo<T>
 ├─ hata            RandevuHatasi, YetkiHatasi
 ├─ web             Oturum, GirisController, HastaController, CalisanController, YoneticiController
 ├─ UygulamaYapilandirmasi, OrnekVeri, RandevuUygulamasi
 src/main/resources/templates   Thymeleaf sayfaları
-src/test/java                  ModelTest, RandevuServisiTest, KurumServisiTest, RaporServisiTest, WebAkisTest
+src/test/java                  ModelTest, RandevuServisiTest, KurumServisiTest, RaporServisiTest, HaftalikTakvimTest, WebAkisTest
 ```
 
 ## Sınırlılıklar ve geliştirme fikirleri
