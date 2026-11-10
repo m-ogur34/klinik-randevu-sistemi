@@ -15,7 +15,7 @@ Gereksinimler: Java 21+, Maven.
 
 ```bash
 mvn spring-boot:run     # http://localhost:8081
-mvn test                # 34 test (birim + web akışı)
+mvn test                # 37 test (birim + web akışı)
 ```
 
 Uygulama açılırken kurgusal örnek veri yüklenir: iki şubeli **Sakarya Şifa Hastanesi**, tek şubeli
@@ -38,6 +38,7 @@ kullanıcı seçilerek o rolle sisteme girilir (demo sürümde şifre yoktur). Y
 | Roller: Hasta, Doktor / Sağlık Personeli, Yönetici | `Rol`, `Hasta`, `Calisan`, `Yonetici`, `Oturum` |
 | *(Ek)* Yönetici raporu: şube/hizmet bazında randevu sayıları ve ciro | `RaporServisi` (Stream API, `groupingBy`) · Yönetici ekranı |
 | *(Ek)* Haftalık takvim: uygunluk dilimleri, randevular ve günlük doluluk | `HaftalikTakvim` · Çalışan ekranı (önceki/sonraki hafta) |
+| *(Ek)* Randevu hatırlatması (24 saat önce, bir kez) ve randevu günlüğü | `HatirlatmaServisi` + `HatirlatmaZamanlayici` (15 dk'da bir), `RandevuGunlugu` (yeni Observer dinleyicisi) |
 
 ## Sınıf diyagramı
 
@@ -102,7 +103,7 @@ classDiagram
 | **Kapsülleme** | `Randevu`'nun durumu yalnızca `onayla()`, `reddet()`, `iptalEt()`, `tamamla()` ile ve kurallı geçişlerle değişir; koleksiyonlar dışarıya salt okunur verilir; şube yalnızca `SaglikKurulusu.subeAc()` ile oluşturulabilir; T.C. kimlik no yalnızca maskeli gösterilir |
 | **Strategy + Open/Closed** | Her iş kuralı ayrı bir `RandevuKurali` sınıfı; yeni kural eklemek servisi değiştirmez |
 | **Single Responsibility** | Geçmiş zaman, hizmet, çalışma saati, uygunluk ve çakışma kontrolleri ayrı sınıflarda |
-| **Observer** | `RandevuDinleyici`; `BildirimKutusu` onay/ret/iptal bildirimlerini ilgili kişiye iletir |
+| **Observer** | `RandevuDinleyici`; `BildirimKutusu` onay/ret/iptal bildirimlerini ilgili kişiye iletir, `RandevuGunlugu` her olayı günlüğe yazar — ikincisi servise dokunmadan eklendi |
 | **Repository + Generics** | `Depo<T extends Varlik>`, `BellekDepo<T>`; `<S extends T> S kaydet(S)` alt türü korur |
 | **Dependency Inversion / Injection** | Servisler depo, kural listesi ve saati (`Clock`) dışarıdan alır; alan sınıfları Spring'e bağımlı değildir, bağlantılar yalnızca `UygulamaYapilandirmasi`'nda kurulur |
 | **Değer nesneleri** | `SaatAraligi`, `ZamanAraligi`, `UygunlukDilimi` (Java `record`, değişmez) |
@@ -137,18 +138,18 @@ src/main/java/tr/sau/randevu/
 ├─ model/kurum     SaglikKurulusu, Sube, CalismaSaatleri, Hizmet, HizmetTuru
 ├─ model/randevu   Randevu, RandevuDurumu, ZamanAraligi, SaatAraligi, UygunlukDilimi
 ├─ kural           RandevuKurali ve 5 kural sınıfı
-├─ servis          RandevuServisi, KurumServisi, RaporServisi, HaftalikTakvim
-├─ olay            RandevuOlayi, RandevuDinleyici, BildirimKutusu
+├─ servis          RandevuServisi, KurumServisi, RaporServisi, HaftalikTakvim, HatirlatmaServisi
+├─ olay            RandevuOlayi, RandevuDinleyici, BildirimKutusu, RandevuGunlugu
 ├─ depo            Depo<T>, BellekDepo<T>
 ├─ hata            RandevuHatasi, YetkiHatasi
 ├─ web             Oturum, GirisController, HastaController, CalisanController, YoneticiController
 ├─ UygulamaYapilandirmasi, OrnekVeri, RandevuUygulamasi
 src/main/resources/templates   Thymeleaf sayfaları
-src/test/java                  ModelTest, RandevuServisiTest, KurumServisiTest, RaporServisiTest, HaftalikTakvimTest, WebAkisTest
+src/test/java                  ModelTest, RandevuServisiTest, KurumServisiTest, RaporServisiTest, HaftalikTakvimTest, HatirlatmaServisiTest, WebAkisTest
 ```
 
 ## Sınırlılıklar ve geliştirme fikirleri
 
 - Veriler bellekte tutulur; uygulama kapanınca silinir (`Depo` arayüzü sayesinde JPA/H2 deposu eklenebilir).
 - Giriş demo amaçlıdır; gerçek kullanımda Spring Security ile kimlik doğrulama gerekir.
-- Bildirimler uygulama içidir; e-posta/SMS için yeni bir `RandevuDinleyici` yazmak yeterlidir.
+- Bildirimler ve hatırlatmalar uygulama içidir; e-posta/SMS için yeni bir `RandevuDinleyici` (veya hatırlatma kanalı) yazmak yeterlidir.

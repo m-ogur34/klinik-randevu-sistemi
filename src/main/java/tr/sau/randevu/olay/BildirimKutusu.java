@@ -40,7 +40,12 @@ public class BildirimKutusu implements RandevuDinleyici {
     }
 
     private void gonder(Long aliciId, String mesaj, RandevuOlayi olay) {
-        bildirimler.add(new Bildirim(aliciId, mesaj, olay.zaman()));
+        bildir(aliciId, mesaj, olay.zaman());
+    }
+
+    /** Olay dışı bildirimler için (ör. randevu hatırlatması). */
+    public synchronized void bildir(Long aliciId, String mesaj, LocalDateTime zaman) {
+        bildirimler.add(new Bildirim(aliciId, mesaj, zaman));
     }
 
     public synchronized List<Bildirim> kisininBildirimleri(Long kisiId) {

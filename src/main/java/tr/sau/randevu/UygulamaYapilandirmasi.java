@@ -10,11 +10,14 @@ import tr.sau.randevu.model.kurum.SaglikKurulusu;
 import tr.sau.randevu.model.kurum.Sube;
 import tr.sau.randevu.model.randevu.Randevu;
 import tr.sau.randevu.olay.BildirimKutusu;
+import tr.sau.randevu.olay.RandevuGunlugu;
+import tr.sau.randevu.servis.HatirlatmaServisi;
 import tr.sau.randevu.servis.KurumServisi;
 import tr.sau.randevu.servis.RandevuServisi;
 import tr.sau.randevu.servis.RaporServisi;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.ZoneId;
 
 /**
@@ -52,7 +55,14 @@ public class UygulamaYapilandirmasi {
     RandevuServisi randevuServisi(Depo<Randevu> randevuDepo, Clock saat, BildirimKutusu bildirimKutusu) {
         RandevuServisi servis = RandevuServisi.varsayilan(randevuDepo, saat);
         servis.dinleyiciEkle(bildirimKutusu);
+        servis.dinleyiciEkle(new RandevuGunlugu());
         return servis;
+    }
+
+    /** Onaylı randevulara başlamadan 24 saat önce hatırlatma gönderilir. */
+    @Bean
+    HatirlatmaServisi hatirlatmaServisi(Depo<Randevu> randevuDepo, BildirimKutusu bildirimKutusu, Clock saat) {
+        return new HatirlatmaServisi(randevuDepo, bildirimKutusu, saat, Duration.ofHours(24));
     }
 
     @Bean
